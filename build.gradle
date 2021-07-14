@@ -1,0 +1,67 @@
+buildscript {
+    ext {
+        gradleBuildParentVersion = '3.0.+'
+    }
+    repositories {
+        maven { url 'https://artifactory/artifactory/libs-release/' }
+    }
+    dependencies {
+        classpath(group: 'au.com.securepay.tools.development', name: 'gradle-build-parent', version: gradleBuildParentVersion, ext: 'zip')
+        classpath(group: 'com.netflix.nebula', name: 'gradle-ospackage-plugin', version: '8.3.0')
+        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.15.2')
+        classpath(group: 'org.springframework.build.gradle', name: 'propdeps-plugin', version: '0.0.7')
+    }
+}
+
+plugins {
+    id 'net.researchgate.release' version '2.8.1'
+    id 'com.jfrog.artifactory' version '4.18.0'
+    id 'java'
+    id 'maven-publish'
+}
+
+group 'au.com.securepay.test.automation'
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    //Please keep this in alphabetical order
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'com.browserup', name: 'browserup-proxy-core', version: '2.1.2'
+    compile group: 'com.codeborne', name: 'selenide', version: '5.19.0'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.2'
+    compile group: 'com.github.javafaker', name: 'javafaker', version: '1.0.2'
+    compile group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
+    compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
+    compile group: 'commons-io', name: 'commons-io', version: '2.7'
+    compile group: 'io.cucumber', name: 'cucumber-java', version: '5.7.0'
+    compile group: 'io.cucumber', name: 'cucumber-junit', version: '5.7.0'
+    compile group: 'io.cucumber', name: 'cucumber-picocontainer', version: '5.7.0'
+    compile group: 'io.netty', name: 'netty-all', version: '4.1.50.Final'
+    compile group: 'io.qameta.allure', name: 'allure-rest-assured', version: '2.13.5'
+    compile group: 'io.qameta.allure', name: 'allure-cucumber5-jvm', version: '2.13.5'
+    compile group: 'io.qameta.allure', name: 'allure-selenide', version: '2.13.5'
+    compile group: 'io.rest-assured', name: 'rest-assured', version: '4.3.1'
+    compile group: 'io.rest-assured', name: 'xml-path', version: '4.3.1'
+    compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.5'
+    compile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.2'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+afterEvaluate { project ->
+    apply from: project.buildscript.classLoader.getResource('standard/defaults.gradle').toURI()
+    beforeReleaseBuild.dependsOn gitPrepareForRelease
+}
+
+afterReleaseBuild.dependsOn artifactoryPublish
